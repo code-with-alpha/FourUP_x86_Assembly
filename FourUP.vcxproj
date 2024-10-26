@@ -85,7 +85,7 @@
       <AdditionalDependencies>irvine32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <MASM>
-      <IncludePaths>C:Irvine</IncludePaths>
+      <IncludePaths>C:\Irvine</IncludePaths>
     </MASM>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

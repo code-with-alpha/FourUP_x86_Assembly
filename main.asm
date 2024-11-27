@@ -104,7 +104,11 @@ fullColumn BYTE "Column is full! Try a different column.", 0
 .code
 main PROC
 
-
+call displayLogo
+call getUserData
+call showInstructions
+call printGetSetGo
+call startGame
 
 exit
 main ENDP

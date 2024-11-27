@@ -89,17 +89,7 @@ startTheMatch BYTE "Let's Start the Match!", 0ah
 invalidInput BYTE "Invalid input! Please enter a number between 0 and 6.", 0                                                           
 matchIsTied BYTE "It's a tie! The board is full.", 0                                                                                   
 fullColumn BYTE "Column is full! Try a different column.", 0                                                                           
-;===================================================================                                                                   
-                                                                                                                                       
-    matrix dword 7 dup( 6 dup(0) )                                                                                                     
-    rowIndex dword 0                                                                                                                   
-    colIndex dword 0                                                                                                                   
-    is_End dword 0                                                                                                                     
-    is_Insert_Possible dword 0                                                                                                         
-    player_turn dword 66                                                                                                               
-    matrixFull dword 0                                                                                                                 
-                                                                                                                                       
-    promptForEnteringColumnNo byte "Enter the column Number : ", 0                                                                                            
+;===================================================================
 
 .code
 main PROC

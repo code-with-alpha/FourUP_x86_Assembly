@@ -43,33 +43,73 @@ gameOver BYTE "          ________   ________   _____ ______    _______          
 
 ;============================================================== ASCII Arts ENDP ===================================================================
 
-greet BYTE "Hello World!", 0
+;======================= Basic Requirements ========================
+matrix dword 7 dup( 6 dup(0) )                                                                                                     
+rowIndex dword 0                                                                                                                   
+colIndex dword 0                                                                                                                   
+is_End dword 0                                                                                                                     
+is_Insert_Possible dword 0                                                                                                         
+player_turn dword 66
+matrixFull dword 0                                                                                                                 
+                                                                                                                                   
+promptForEnteringColumnNo byte "Enter the column Number : ", 0
+
+; =============== prompts for getting the user data ===============                                                                    
+askForUsername_1 BYTE "Enter Name for Player - 01: ", 0                                                                                
+askForUsername_2 BYTE "Enter Name for Player - 02: ", 0                                                                                
+player_1 BYTE 20 DUP(0)                                                                                                                
+player_2 BYTE 20 DUP(0)                                                                                                                
+                                                                                                                                       
+; =============== assign Keys ===============                                                                                          
+KeyForPlayer_1 BYTE ", Your in-game Key is: B", 0                                                                                      
+KeyForPlayer_2 BYTE ", Your in-game Key is: R", 0                                                                                      
+                                                                                                                                       
+; =============== Game Prompts ===============                                                                                         
+printTurn BYTE ", it's your turn.", 0                                                                                                  
+cong BYTE "Congratulations ", 0                                                                                                        
+wonTheMatch BYTE "! You won the Match", 0                                                                                              
+forLost BYTE ", better Luck Next Time", 0                                                                                              
+                                                                                                                                       
+                                                                                                                                       
+; =================== Instructions ====================                                                                                
+promptForInstructions BYTE "Before moving ahead, just take a look at the instructions set.", 0                                         
+instructions BYTE "Following are the set of instructions.", 0ah                                                                        
+             BYTE "- To play, enter the column number (0-6) where you want to place your key.", 0ah                                    
+             BYTE "- The first player to connect four keys in a row, column, or the diagonal wins!", 0ah                               
+             BYTE "- If you'll not Enter any key, the game will place your key in 0th column if there is any space in that column", 0ah
+             BYTE "- The game ends in a tie if the board is full and none of the player has connect their four keys.", 0ah, 0ah        
+             BYTE "Press any key to continue.......", 0                                                                                
+                                                                                                                                       
+continue BYTE "Press any key to continue.........", 0                                                                                  
+                                                                                                                                       
+;====================== Start The Match ==========================                                                                     
+startTheMatch BYTE "Let's Start the Match!", 0ah                                                                                       
+              BYTE "Place Your Keys in the Grid and Connect Four of them to Win the Match.", 0                                         
+                                                                                                                                       
+invalidInput BYTE "Invalid input! Please enter a number between 0 and 6.", 0                                                           
+matchIsTied BYTE "It's a tie! The board is full.", 0                                                                                   
+fullColumn BYTE "Column is full! Try a different column.", 0                                                                           
+;===================================================================                                                                   
+                                                                                                                                       
+    matrix dword 7 dup( 6 dup(0) )                                                                                                     
+    rowIndex dword 0                                                                                                                   
+    colIndex dword 0                                                                                                                   
+    is_End dword 0                                                                                                                     
+    is_Insert_Possible dword 0                                                                                                         
+    player_turn dword 66                                                                                                               
+    matrixFull dword 0                                                                                                                 
+                                                                                                                                       
+    promptForEnteringColumnNo byte "Enter the column Number : ", 0                                                                                            
 
 .code
 main PROC
 
-mov edx, OFFSET fourUp
-call writestring
 
-call CRLF
-
-mov edx, OFFSET instructionMenu
-call writestring
-
-call CRLF
-
-mov edx, OFFSET getSetGo
-call writestring
-
-call CRLF
-
-mov edx, OFFSET gameOver
-call writestring
 
 exit
 main ENDP
 
-================================================ Game Starting Point ===============================================================
+;================================================ Game Starting Point ===============================================================
 
 startGame PROC
 
@@ -102,7 +142,7 @@ GameLoop:
     call CRLF                                                                                                                            
                                                                                                                                          
     input:                                                                                                                               
-        mov edx, offset p1                                                                                                               
+        mov edx, offset promptForEnteringColumnNo                                                                                                               
         call writestring                                                                                                                 
         call readint                                                                                                                     
                                                                                                                                          
@@ -240,26 +280,7 @@ InsertInMatrix PROC
     mul esi                                                                                                                              
     mov esi, eax                ; moved to first index of last row i.e. index = 35                                                       
     add esi , colIndex          ; moved to desired index                                                                                 
-                                                                                                                                         
-                        ; in this proc, we have to check if the selected column has a place to insert,                                   
-                        ; therefore we have to traverse vertically in the column                                                         
-                        ;                                                                                                                
-                        ; LOGIC FOR TRAVERSING VERTICALLY                                                                                
-                        ;                                                                                                                
-                        ; E.g. For colIndex = 4, we have to go to index 39,                                                              
-                        ; we have ecx = esi = 6, after dec, esi = 5, mul with 7 (total cols)                                             
-                        ; esi =  35, now add colIndex, esi, We Get esi = 39                                                              
-                        ;                                                                                                                
-                        ; For Next Iteration, Index = 32                                                                                 
-                        ; we have ecx = esi = 5, after dec, esi = 4, mul with 7 (total cols)                                             
-                        ; esi =  28, now add colIndex, esi, We get esi = 32                                                              
-                        ;                                                                                                                
-                        ; mov esi, ecx                                                                                                   
-                        ; dec esi                                                                                                        
-                        ; mov eax, 7                                                                                                     
-                        ; mul esi                                                                                                        
-                        ; mov esi, eax                                                                                                   
-                        ; add esi, colIndex                                                                                              
+                                                                                                                                                                                                                                       
     mov ecx, 6                                                                                                                           
     colLoop:                                                                                                                             
         cmp matrix[esi*type matrix], 0                                                                                                   
@@ -518,5 +539,125 @@ ComputeMatrix PROC
 ret                                                                                                                                      
 ComputeMatrix ENDP
 
+
+;=============================== Get User Data ======================================
+
+getUserData PROC
+
+mov edx, OFFSET askForUsername_1
+call writestring
+mov ecx, 20
+mov edx, OFFSET player_1
+call readstring
+
+mov edx, OFFSET askForUsername_2
+call writestring
+;mov ecx, 20
+mov edx, OFFSET player_2
+call readstring
+
+call CRLF
+
+mov edx, OFFSET player_1
+call writestring
+mov edx, OFFSET KeyForPlayer_1
+call writestring
+
+call CRLF
+
+mov edx, OFFSET player_2
+call writestring
+mov edx, OFFSET KeyForPlayer_2
+call writestring
+call CRLF
+call CRLF
+
+
+ret
+getUserData ENDP
+
+;=================================================== Display FOUR UP logo ===============================================================
+
+displayLogo PROC
+
+mov eax, yellow
+call setTextColor
+
+mov dh, 5
+mov dl, 0
+call gotoxy
+
+mov edx, offset fourUp
+call writeString
+;mov eax, 1500
+;call delay
+
+;call clrscr
+call CRLF
+ret
+displayLogo ENDP
+
+;==================================================== Print Game Over ================================================================
+
+printGameOver PROC
+
+mov edx, offset gameOver
+call writestring
+call CRLF
+call CRLF
+
+ret
+printGameOver ENDP
+
+;============================================= Print Get Set Go ================================================================
+
+printGetSetGo PROC
+
+call CRLF
+
+mov edx, OFFSET getSetGo
+call writestring
+
+call CRLF
+call CRLF
+
+mov edx, OFFSET startTheMatch
+call writestring
+
+call CRLF
+call CRLF
+
+ret
+printGetSetGo ENDP
+
+;================================= Print Instructions ================================================================
+
+showInstructions PROC
+
+mov edx, offset promptForInstructions
+call writestring
+
+call CRLF
+
+mov edx, offset continue
+call writestring
+call readchar
+
+call CRLF
+call CRLF
+
+mov edx, offset instructionMenu
+call writestring
+
+call CRLF
+
+mov edx, OFFSET instructions
+call writestring
+
+call readchar
+call CRLF
+
+ret
+showInstructions ENDP
 
 END main

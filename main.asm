@@ -77,10 +77,8 @@ instructions BYTE "Following are the set of instructions.", 0ah
              BYTE "- To play, enter the column number (0-6) where you want to place your key.", 0ah                                    
              BYTE "- The first player to connect four keys in a row, column, or the diagonal wins!", 0ah                               
              BYTE "- If you'll not Enter any key, the game will place your key in 0th column if there is any space in that column", 0ah
-             BYTE "- The game ends in a tie if the board is full and none of the player has connect their four keys.", 0ah, 0ah        
-             BYTE "Press any key to continue.......", 0                                                                                
-                                                                                                                                       
-continue BYTE "Press any key to continue.........", 0                                                                                  
+             BYTE "- The game ends in a tie if the board is full and none of the player has connect their four keys.", 0ah, 0ah, 0                                                                               
+                                                                               
                                                                                                                                        
 ;====================== Start The Match ==========================                                                                     
 startTheMatch BYTE "Let's Start the Match!", 0ah                                                                                       
@@ -170,17 +168,25 @@ GameLoop:
     jmp GameLoop                                                                                                                         
                            ; 81                                                                                                          
     WrongInput:                                                                                                                          
-        call crlf                                                                                                                        
+        call crlf       
+        mov eax, red
+        call setTextColor
         mov edx, offset invalidInput                                                                                                     
-        call writestring                                                                                                                 
+        call writestring
+        mov eax, lightgreen
+        call setTextColor
         call CRLF                                                                                                                        
         call CRLF                                                                                                                        
         jmp GameLoop                                                                                                                     
                                                                                                                                          
     InsetionNotPossible:                                                                                                                 
-        call crlf                                                                                                                        
+        call crlf       
+        mov eax, red
+        call setTextColor
         mov edx, offset fullColumn                                                                                                       
-        call writestring                                                                                                                 
+        call writestring   
+        mov eax, lightgreen
+        call setTextColor
         call CRLF                                                                                                                        
         call CRLF                                                                                                                        
         jmp GameLoop                                                                                                                     
@@ -574,10 +580,10 @@ getUserData ENDP
 
 displayLogo PROC
 
-mov eax, yellow
+mov eax, lightgreen
 call setTextColor
 
-mov dh, 5
+mov dh, 3
 mov dl, 0
 call gotoxy
 
@@ -633,9 +639,7 @@ call writestring
 
 call CRLF
 
-mov edx, offset continue
-call writestring
-call readchar
+call waitmsg
 
 call CRLF
 call CRLF
@@ -648,7 +652,7 @@ call CRLF
 mov edx, OFFSET instructions
 call writestring
 
-call readchar
+call waitmsg
 call CRLF
 
 ret

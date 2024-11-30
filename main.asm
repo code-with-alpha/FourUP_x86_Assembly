@@ -346,7 +346,7 @@ call crlf
                                                                                                                                          
         call CRLF                                                                                                                        
         cmp Bot_selected, 1
-        jmp endd                                                                                                                         
+        je endd                                                                                                                         
         
         mov edx, offset player_2                                                                                                         
         call writestring                                                                                                                 
@@ -993,7 +993,7 @@ here:
     mov eax, random_arr[esi * type random_arr]
 ret
 generateRandomNumber ENDP
-=================================================================
+;=================================================================
 
 ;========================= Show Menu ============================
 
@@ -1067,6 +1067,6 @@ call CRLF
 
 ret
 showTeam ENDP
-===============================================================
+;===============================================================
 
 END main

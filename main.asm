@@ -102,7 +102,12 @@ team BYTE "----------", 0ah
 
 loading BYTE "Loading", 0
 loadingBar BYTE "=", 0
+
+botIsThinking BYTE "genZ is thinking", 0
+botKeyPlaced BYTE "genZ placed his key at column: ", 0
      
+count DWORD 0
+
 promptForEnteringColumnNo byte "Enter the column Number : ", 0
 
 ; =============== prompts for getting the user data ===============
@@ -205,8 +210,35 @@ GameLoop:
                  
     jmp input
     bot_is_playing:
+    inc count
     mov eax, colIndex
+
+    cmp count, 3
+    jl skipThinking
+    
+    call CRLF
+    mov edx, OFFSET botIsThinking
+    call writestring
+
+    mov ecx, 3
+    printDots:
+        mov eax, '.'
+        call writechar
+
+        mov eax, 1000
+        call delay
+
+    Loop printDots
+    call CRLF
+
+    skipThinking:
+
+    mov edx, OFFSET botKeyPlaced
+    call writestring
+
     call generateRandomNumber
+    call writeint
+    call CRLF
     jmp Bot_turn
     
     
@@ -252,19 +284,34 @@ GameLoop:
     jmp GameLoop                                                                                                                         
                                                                                                                                          
     WrongInput:                                                                                                                          
-        call crlf                                                                                                                        
+        call crlf       
+        
+        mov eax, red
+        call setTextColor
+
         mov edx, offset invalidInput                                                                                                     
         call writestring                                                                                                                 
         call CRLF                                                                                                                        
-        call CRLF                                                                                                                        
+        call CRLF          
+        
+        mov eax, lightgreen
+        call setTextColor
+
         jmp GameLoop                                                                                                                     
                                                                                                                                          
     InsetionNotPossible:                                                                                                                 
-        call crlf                                                                                                                        
+        call crlf    
+
+        mov eax, red
+        call setTextColor
+
         mov edx, offset fullColumn                                                                                                       
         call writestring                                                                                                                 
         call CRLF                                                                                                                        
-        call CRLF                                                                                                                        
+        call CRLF         
+        
+        mov eax, lightgreen
+        call setTextColor
         jmp GameLoop                                                                                                                     
                                                                                                                                          
     MatchTied:                                                                                                                           

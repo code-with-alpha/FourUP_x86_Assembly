@@ -28,7 +28,9 @@ squad BYTE "                                        _________  ____________    _
       BYTE "                                        \ \_________\ \  \    \  \ \ \  \  \  \ \ \   __  \ \ \  \     \  \           ", 0ah
       BYTE "                                         \|_____|\  \\ \  \____\  \ \ \  \__\  \ \ \  \ \  \ \ \  \_____\  \         ", 0ah
       BYTE "                                           _______\  \\ \__________\ \ \________\ \ \__\ \__\ \ \_________ \        ", 0ah
-      BYTE "                                           \__________\\|__________|  \|________|| \|__|\|__|  \|__________|       ", 0
+      BYTE "                                           \__________\\|__________|  \|________|| \|__|\|__|  \|__________|       ", 0ah
+      BYTE "                                                            \   \                                                   ", 0ah
+      BYTE "                                                             \___\                                                   ", 0
 
 
 presents BYTE "                                ________   ________   _______    ________   _______    ________    _________   ________           ", 0ah
@@ -37,7 +39,7 @@ presents BYTE "                                ________   ________   _______    
          BYTE "                                \ \   ____\\ \   _  _\\ \  \_|/__\ \_____  \\ \  \_|/__\ \  \\ \  \    \ \  \  \ \_____  \       ", 0ah
          BYTE "                                 \ \  \___| \ \  \\  \|\ \  \_|\ \\|____|\  \\ \  \_|\ \\ \  \\ \  \    \ \  \  \|____|\  \     ", 0ah
          BYTE "                                  \ \__\     \ \__\\ _\ \ \_______\ ____\_\  \\ \_______\\ \__\\ \__\    \ \__\   ____\_\  \   ", 0ah
-         BYTE "                                   \|__|      \|__|\|__| \|_______||\_________\\|_______| \|__| \|__|     \|__|  |\_________\ ", 0
+         BYTE "                                   \|__|      \|__|\|__| \|_______||\_________\\|_______| \|__| \|__|     \|__|   \_________\ ", 0
 
 
 instructionMenu  BYTE "      ___  ________   ________  _________  ________  ___  ___  ________ _________  ___  ________  ________      ", 0ah
@@ -77,15 +79,46 @@ colIndex dword 0
 is_End dword 0                                                                                                                     
 is_Insert_Possible dword 0                                                                                                         
 player_turn dword 66
-matrixFull dword 0                                                                                                                 
-                                                                                                                                   
+matrixFull dword 0
+Bot_selected dword 0                                                                                                                 
+random_arr dword 3,1,6,2,5,0,4                                                                                                                                         
+totall dword 1
+
+menu BYTE "1. Play a Match.", 0ah
+     BYTE "2. Team Members.", 0ah
+     BYTE "3. Exit.", 0ah
+     BYTE "Enter your choice : ", 0
+
+menuItems BYTE "1. Single Player (Player vs Computer).", 0ah
+          BYTE "2. Multi-Player (Player vs Player)", 0ah
+          BYTE "3. Back", 0ah
+          BYTE "Enter your choice : ", 0
+
+team BYTE "----------", 0ah
+     BYTE "Abubakar Ahmed (23K-0801)", 0ah
+     BYTE "Kirish Kumar (23K-0641)", 0ah
+     BYTE "Sameed Jamal Khan (23K-0812)", 0ah
+     BYTE "-----------------------------------", 0
+
+loading BYTE "Loading", 0
+loadingBar BYTE "=", 0
+     
 promptForEnteringColumnNo byte "Enter the column Number : ", 0
 
-; =============== prompts for getting the user data ===============                                                                    
+; =============== prompts for getting the user data ===============
+
+; ----------- playing against Bot -------------
+askForName BYTE "Enter Player Name: ", 0
+promptt BYTE ", You are playing against genZ..!", 0
+rememberYourKey BYTE "Must remember your key...!", 0
+
+
 askForUsername_1 BYTE "Enter Name for Player - 01: ", 0                                                                                
 askForUsername_2 BYTE "Enter Name for Player - 02: ", 0                                                                                
 player_1 BYTE 20 DUP(0)                                                                                                                
-player_2 BYTE 20 DUP(0)                                                                                                                
+player_2 BYTE 20 DUP(0)
+Bot_player BYTE "genZ", 0                                                                                                                  
+botTurn BYTE "Bot's Turn", 0 
                                                                                                                                        
 ; =============== assign Keys ===============                                                                                          
 KeyForPlayer_1 BYTE ", Your in-game Key is: B", 0                                                                                      
@@ -120,26 +153,33 @@ fullColumn BYTE "Column is full! Try a different column.", 0
 main PROC
 
 call displayLogo
+call showMenu
+
+cmp eax, 10
+je exitt
+
 call getUserData
 call showInstructions
 call printGetSetGo
 call startGame
 
+exitt:
 exit
 main ENDP
 
 ;================================================ Game Starting Point ===============================================================
 
-startGame PROC
-
-GameLoop:
-
-    call DisplayMatrix
-
-    call is_Full
-    cmp matrixFull, 1
-    je MatchTied
-
+startGame PROC                                                                                                                           
+                                                                                                                                         
+GameLoop:                                                                                                                                
+    
+    call DisplayMatrix                                                                                                                   
+                                                                                                                                         
+    call is_Full                                                                                                                         
+    cmp matrixFull, 1                                                                                                                    
+    je MatchTied                                                                                                                         
+    
+    
     cmp player_turn, 66
     jne P2_turn
     call crlf
@@ -149,28 +189,45 @@ GameLoop:
     mov edx, offset printTurn                                                                                                            
     call writestring                                                                                                                     
     call CRLF                                                                                                                            
-    jmp input                                                                                                                            
+    jmp input
                                                                                                                                          
     P2_turn:                                                                                                                             
     call crlf                                                                                                                            
+    
+    cmp Bot_selected, 1
+    je bot_is_playing                                                                                                           
                                                                                                                                          
     mov edx, offset player_2                                                                                                             
     call writestring                                                                                                                     
     mov edx, offset printTurn                                                                                                            
     call writestring                                                                                                                     
     call CRLF                                                                                                                            
-                                                                                                                                         
-    input:                                                                                                                               
+                 
+    jmp input
+    bot_is_playing:
+    mov eax, colIndex
+    call generateRandomNumber
+    jmp Bot_turn
+    
+    
+    input:
+        cmp player_turn, 66
+        je takeInput
+        cmp Bot_selected, 1
+        je Bot_turn
+        
+        takeInput:
         mov edx, offset promptForEnteringColumnNo                                                                                                               
         call writestring                                                                                                                 
         call readint                                                                                                                     
-                                                                                                                                         
+
         cmp eax, 0 ;// checking if input is correct                                                                                      
         jl WrongInput                                                                                                                    
         cmp eax, 6                                                                                                                       
         jg WrongInput                                                                                                                    
                                                                                                                                          
         ; program reaching here means input is correct                                                                                   
+        Bot_turn:                                                                                                                              
                                                                                                                                          
         call InsertInMatrix                                                                                                              
         cmp is_Insert_Possible, 0                                                                                                        
@@ -193,27 +250,19 @@ GameLoop:
                                                                                                                                          
     call crlf                                                                                                                            
     jmp GameLoop                                                                                                                         
-                           ; 81                                                                                                          
+                                                                                                                                         
     WrongInput:                                                                                                                          
-        call crlf       
-        mov eax, red
-        call setTextColor
+        call crlf                                                                                                                        
         mov edx, offset invalidInput                                                                                                     
-        call writestring
-        mov eax, lightgreen
-        call setTextColor
+        call writestring                                                                                                                 
         call CRLF                                                                                                                        
         call CRLF                                                                                                                        
         jmp GameLoop                                                                                                                     
                                                                                                                                          
     InsetionNotPossible:                                                                                                                 
-        call crlf       
-        mov eax, red
-        call setTextColor
+        call crlf                                                                                                                        
         mov edx, offset fullColumn                                                                                                       
-        call writestring   
-        mov eax, lightgreen
-        call setTextColor
+        call writestring                                                                                                                 
         call CRLF                                                                                                                        
         call CRLF                                                                                                                        
         jmp GameLoop                                                                                                                     
@@ -223,7 +272,9 @@ GameLoop:
         call printGameOver                                                                                                               
                                                                                                                                          
         mov edx, offset matchIsTied                                                                                                      
-        call writestring                                                                                                                 
+        call writestring    
+        call crlf                                                                                                                        
+        
         jmp endd                                                                                                                         
                                                                                                                                          
     GameEnd:                                                                                                                             
@@ -231,7 +282,8 @@ GameLoop:
         call crlf                                                                                                                        
         call DisplayMatrix                                                                                                               
         call printGameOver                                                                                                               
-                                                                                                                                         
+call crlf                                                                                                                        
+        
     DisplayWinner:                                                                                                                       
         cmp is_End, 66                                                                                                                   
         jne Player2                                                                                                                      
@@ -246,7 +298,9 @@ GameLoop:
         call writestring                                                                                                                 
                                                                                                                                          
         call CRLF                                                                                                                        
-                                                                                                                                         
+        cmp Bot_selected, 1
+        jmp endd                                                                                                                         
+        
         mov edx, offset player_2                                                                                                         
         call writestring                                                                                                                 
         mov edx, offset forLost                                                                                                          
@@ -256,13 +310,25 @@ GameLoop:
     jmp endd                                                                                                                             
                                                                                                                                          
     Player2:                                                                                                                             
-        ;cmp is_End, 81                                                                                                                  
                                                                                                                                          
         call CRLF                                                                                                                        
         mov edx, offset cong                                                                                                             
         call writestring                                                                                                                 
+        
+        cmp Bot_selected, 1
+        je bot_wins                                                                                                                     
+        
         mov edx, offset player_2                                                                                                         
-        call writestring                                                                                                                 
+        call writestring
+        jmp wonMatch                                                                                                                        
+        
+        bot_wins:
+        
+        mov edx, offset bot_player
+        call writestring
+        
+        wonMatch:  
+        
         mov edx, offset wonTheMatch                                                                                                      
         call writestring                                                                                                                 
                                                                                                                                          
@@ -277,7 +343,7 @@ GameLoop:
                                                                                                                                          
 endd:                                                                                                                                    
                                                                                                                                          
-startGame ENDP                                                                                                                           
+startGame ENDP                                                                                                                            
                                                                                                                                          
 ;===========================================   isFull PROC   ===================================================================================     
                                                                                                                                          
@@ -571,11 +637,25 @@ ComputeMatrix ENDP
 
 getUserData PROC
 
+call CRLF
+cmp Bot_selected, 1
+je skipDefaultPrompt
+
 mov edx, OFFSET askForUsername_1
 call writestring
+jmp getName
+
+skipDefaultPrompt:
+mov edx, OFFSET askForName
+call writestring
+
+getName:
 mov ecx, 20
 mov edx, OFFSET player_1
 call readstring
+
+cmp Bot_selected, 1
+je skipPlayer2
 
 mov edx, OFFSET askForUsername_2
 call writestring
@@ -583,6 +663,29 @@ call writestring
 mov edx, OFFSET player_2
 call readstring
 
+skipPlayer2:
+
+call CRLF
+
+cmp Bot_selected, 1
+jne L2
+mov edx, OFFSET player_1
+call writestring
+mov edx, OFFSET promptt
+call writestring
+
+call CRLF
+
+; ------------------------- assigning keys to players ---------------------
+
+
+
+L2:
+
+call CRLF
+
+mov edx, OFFSET rememberYourKey
+call writestring
 call CRLF
 
 mov edx, OFFSET player_1
@@ -591,6 +694,8 @@ mov edx, OFFSET KeyForPlayer_1
 call writestring
 
 call CRLF
+cmp Bot_selected, 1
+je skipdisplayPlayer2
 
 mov edx, OFFSET player_2
 call writestring
@@ -599,6 +704,17 @@ call writestring
 call CRLF
 call CRLF
 
+jmp endd
+
+skipdisplayPlayer2:
+mov edx, offset Bot_player
+call writestring
+mov edx, OFFSET KeyForPlayer_2
+call writestring
+call CRLF
+call CRLF
+
+endd:
 
 ret
 getUserData ENDP
@@ -639,7 +755,51 @@ L1:
     dec ebx
 Loop L1
 
-mov dh, 2
+mov dh, 7
+mov dl, 70
+call gotoxy
+
+
+mov edx, OFFSET loading
+call writestring
+
+mov ecx, 3
+mov ebx, 71
+L2:
+    
+    mov eax, '.'
+    call writechar
+
+    mov eax, 1000
+    call delay
+
+    mov dl, bl
+    call gotoxy
+    inc bl
+Loop L2
+
+call CRLF
+
+mov dh, 8
+mov dl, 45
+call gotoxy
+
+mov ecx, 60
+mov ebx, 70
+L3:
+    mov edx, OFFSET loadingBar
+    call writestring
+
+    mov eax, ebx
+    call delay
+
+    dec ebx
+
+Loop L3
+
+call clrscr
+
+mov dh, 4
 mov dl, 0
 
 call gotoxy
@@ -650,7 +810,7 @@ call WriteString
 mov eax, 700
 call delay
 
-mov dh, 10
+mov dh, 13
 mov dl, 0
 
 call gotoxy
@@ -661,7 +821,7 @@ call writestring
 mov eax, 700
 call delay
 
-mov dh, 18
+mov dh, 23
 mov dl, 0
 call gotoxy
 
@@ -763,5 +923,91 @@ call CRLF
 
 ret
 showInstructions ENDP
+
+generateRandomNumber PROC
+
+inc totall
+cmp totall, 6
+je reset
+
+mov eax, totall
+jmp here
+
+reset:
+    mov totall, 0
+    mov eax, totall
+
+here:
+    mov esi , eax
+    mov eax, random_arr[esi * type random_arr]
+ret
+generateRandomNumber ENDP
+
+showMenu PROC
+    mov edx, offset menu
+    call writestring
+
+    call readint
+    cmp eax, 1
+    je playMatch
+
+    cmp eax, 2
+    je show_team
+
+    cmp eax, 3
+    je exitt
+
+
+
+exitt:
+    mov eax, 10
+    je enddddd
+
+
+show_team:
+	call showTeam
+	call showMenu
+
+playMatch:
+
+    call CRLF
+    call CRLF
+
+    mov edx, offset menuItems
+	call writestring
+
+	call readint
+	cmp eax, 1
+	je singlePlayer
+
+    cmp eax, 3
+    je show__menu
+
+    cmp eax, 2
+    je enddddd
+
+singlePlayer:
+    mov Bot_selected, 1
+    jmp enddddd
+
+show__menu:
+    call CRLF
+    call CRLF
+    call showMenu
+
+enddddd:
+
+ret
+showMenu ENDP
+
+showTeam PROC
+
+mov edx, OFFSET team
+call writestring
+
+call CRLF
+call CRLF
+ret
+showTeam ENDP
 
 END main

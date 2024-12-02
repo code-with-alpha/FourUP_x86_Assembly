@@ -133,7 +133,7 @@ KeyForPlayer_2 BYTE ", Your in-game Key is: R", 0
 ; =============== Game Prompts ===============                                                                                         
 printTurn BYTE ", it's your turn.", 0                                                                                                  
 cong BYTE "Congratulations ", 0                                                                                                        
-wonTheMatch BYTE "! You won the Match", 0                                                                                              
+wonTheMatch BYTE "! You won the Match.", 0                                                                                              
 forLost BYTE ", better Luck Next Time", 0                                                                                              
                                                                                                                                        
                                                                                                                                        
@@ -152,13 +152,14 @@ startTheMatch BYTE "Let's Start the Match!", 0ah
                                                                                                                                        
 invalidInput BYTE "Invalid input! Please enter a number between 0 and 6.", 0                                                           
 matchIsTied BYTE "It's a tie! The board is full.", 0                                                                                   
-fullColumn BYTE "Column is full! Try a different column.", 0                                                                           
+fullColumn BYTE "Column is full! Try a different column.", 0
+WrongMenuInput BYTE "Please Enter the choice between 1-3.", 0
 ;===================================================================
 
 .code
 main PROC
 
-call displayLogo
+;call displayLogo
 call showMenu
 
 cmp eax, 10
@@ -188,7 +189,7 @@ GameLoop:
     
     cmp player_turn, 66
     jne P2_turn
-    call crlf
+    call CRLF
                                                                                                                                          
     mov edx, offset player_1                                                                                                             
     call writestring                                                                                                                     
@@ -198,7 +199,7 @@ GameLoop:
     jmp input
                                                                                                                                          
     P2_turn:                                                                                                                             
-    call crlf                                                                                                                            
+    call CRLF                                                                                                                            
     
     cmp Bot_selected, 1
     je bot_is_playing                                                                                                           
@@ -252,7 +253,8 @@ GameLoop:
         takeInput:
         mov edx, offset promptForEnteringColumnNo                                                                                                               
         call writestring                                                                                                                 
-        call readint                                                                                                                     
+        call readint 
+        
 
         cmp eax, 0 ;// checking if input is correct                                                                                      
         jl WrongInput                                                                                                                    
@@ -281,11 +283,11 @@ GameLoop:
         Change_Turn:                                                                                                                     
         mov player_turn, 66                                                                                                              
                                                                                                                                          
-    call crlf                                                                                                                            
+    call CRLF                                                                                                                            
     jmp GameLoop                                                                                                                         
                                                                                                                                          
     WrongInput:                                                                                                                          
-        call crlf       
+        call CRLF       
         
         mov eax, red
         call setTextColor
@@ -301,7 +303,7 @@ GameLoop:
         jmp GameLoop                                                                                                                     
                                                                                                                                          
     InsetionNotPossible:                                                                                                                 
-        call crlf    
+        call CRLF    
 
         mov eax, red
         call setTextColor
@@ -316,21 +318,21 @@ GameLoop:
         jmp GameLoop                                                                                                                     
                                                                                                                                          
     MatchTied:                                                                                                                           
-        call crlf                                                                                                                        
+        call CRLF                                                                                                                        
         call printGameOver                                                                                                               
                                                                                                                                          
         mov edx, offset matchIsTied                                                                                                      
         call writestring    
-        call crlf                                                                                                                        
+        call CRLF                                                                                                                        
         
         jmp endd                                                                                                                         
                                                                                                                                          
     GameEnd:                                                                                                                             
-        call crlf                                                                                                                        
-        call crlf                                                                                                                        
+        call CRLF                                                                                                                        
+        call CRLF                                                                                                                        
         call DisplayMatrix                                                                                                               
         call printGameOver                                                                                                               
-call crlf                                                                                                                        
+        call CRLF                                                                                                                        
         
     DisplayWinner:                                                                                                                       
         cmp is_End, 66                                                                                                                   
@@ -414,7 +416,8 @@ is_Full ENDP
                                                                                                                                          
 ;=============================================   Insert in Matrix   ======================================================================================     
                                                                                                                                          
-InsertInMatrix PROC                                                                                                                      
+InsertInMatrix PROC      
+
     mov colIndex, eax                                                                                                                    
     mov eax, 7                                                                                                                           
     mov esi, 5                                                                                                                           
@@ -439,7 +442,11 @@ InsertInMatrix PROC
         mov matrix[esi*type matrix], eax                                                                                                 
         dec ecx                                                                                                                          
         mov rowIndex, ecx                                                                                                                
-    enddd:                                                                                                                               
+    enddd:      
+
+mov eax, lightgreen
+call setTextColor
+
 ret                                                                                                                                      
 InsertInMatrix ENDP                                                                                                                      
                                                                                                                                          
@@ -453,27 +460,47 @@ DisplayMatrix PROC
         mov ecx, 7                                                                                                                       
                                                                                                                                          
         l2:                                                                                                                              
-            mov eax, matrix[esi*type matrix]                                                                                             
-            cmp eax, 0                                                                                                                   
+            mov edx, matrix[esi*type matrix]   
+            
+            cmp edx, 0                                                                                                                   
             je WriteDot                                                                                                                  
-                                                                                                                                         
-            call writechar                                                                                                               
+            
+
+            cmp edx, 66
+            je setBlue
+            mov eax, red
+            call setTextColor
+
+            jmp skipBlue
+
+            setBlue:
+                mov eax, blue
+                call setTextColor
+
+            skipBlue:
+                
+            mov eax, edx
+            
+            call writechar                                                                                                              
             jmp writeSpace                                                                                                               
                                                                                                                                          
             WriteDot:                                                                                                                    
                 mov eax, '.'                                                                                                             
                 call writechar                                                                                                           
                                                                                                                                          
-                writeSpace:                                                                                                              
-                mov al, ' '                                                                                                              
-                call writechar                                                                                                           
-                inc esi                                                                                                                  
+                writeSpace:
+                    mov eax, lightgreen
+                    call setTextColor
+                    
+                    mov al, ' '                                                                                                              
+                    call writechar                                                                                                           
+                    inc esi                                                                                                                  
             loop l2                                                                                                                      
             call CRLF                                                                                                                    
             mov ecx, ebx                                                                                                                 
         loop l1                                                                                                                          
 ret                                                                                                                                      
-DisplayMatrix ENDP                                                                                                                       
+DisplayMatrix ENDP                                                                                                                      
                                                                                                                                          
 ;=================================================== Compute Matrix  ================================================================================     
                                                                                                                                          
@@ -978,6 +1005,18 @@ showInstructions ENDP
 
 generateRandomNumber PROC
 
+call Randomize
+
+call RandomRange
+mov ebx, 7
+cdq
+div ebx
+
+mov eax, edx
+
+
+COMMENT !
+
 inc totall
 cmp totall, 6
 je reset
@@ -992,6 +1031,8 @@ reset:
 here:
     mov esi , eax
     mov eax, random_arr[esi * type random_arr]
+!
+
 ret
 generateRandomNumber ENDP
 ;=================================================================
@@ -999,6 +1040,8 @@ generateRandomNumber ENDP
 ;========================= Show Menu ============================
 
 showMenu PROC
+
+Menu_Loop:
     mov edx, offset menu
     call writestring
 
@@ -1012,7 +1055,18 @@ showMenu PROC
     cmp eax, 3
     je exitt
 
-
+   jg WrongMenuInputt
+   cmp eax, 0
+   jle WrongMenuInputt
+    
+    WrongMenuInputt:
+    call crlf
+    call crlf
+    mov edx, offset WrongMenuInput
+    call writestring
+    jmp show__menu
+    
+je show__menu
 
 exitt:
     mov eax, 10
@@ -1021,7 +1075,7 @@ exitt:
 
 show_team:
 	call showTeam
-	call showMenu
+	jmp show__menu
 
 playMatch:
 
@@ -1048,7 +1102,7 @@ singlePlayer:
 show__menu:
     call CRLF
     call CRLF
-    call showMenu
+    Jmp Menu_Loop
 
 enddddd:
 

@@ -70,7 +70,7 @@ gameOver BYTE "          ________   ________   _____ ______    _______          
          BYTE "            \ \_______\\ \__\ \__\\ \__\    \ \__\\ \_______\       \ \_______\\ \__/ /      \ \_______\\ \__\\ _\ ", 0ah     
          BYTE "             \|_______| \|__|\|__| \|__|     \|__| \|_______|        \|_______| \|__|/        \|_______| \|__|\|__|", 0       
 
-exploreTheMagic BYTE "Press any key to explore the magic...", 0
+exploreTheMagic BYTE "Press ENTER key to explore the magic...", 0
 ;============================================================== ASCII Arts ENDP ===================================================================
 
 ;======================= Basic Requirements ========================
@@ -86,7 +86,7 @@ random_arr dword 3,1,6,2,5,0,4
 totall dword 1
 
 menu BYTE "1. Play a Match.", 0ah
-     BYTE "2. Team Members.", 0ah
+     BYTE "2. Developers.", 0ah
      BYTE "3. Exit.", 0ah
      BYTE "Enter your choice : ", 0
 
@@ -95,7 +95,8 @@ menuItems BYTE "1. Single Player (Player vs Computer).", 0ah
           BYTE "3. Back", 0ah
           BYTE "Enter your choice : ", 0
 
-team BYTE "----------", 0ah
+team BYTE " ", 0ah, 0ah
+     BYTE "----------", 0ah
      BYTE "Abubakar Ahmed (23K-0801)", 0ah
      BYTE "Kirish Kumar (23K-0641)", 0ah
      BYTE "Sameed Jamal Khan (23K-0812)", 0ah
@@ -158,8 +159,7 @@ WrongMenuInput BYTE "Please Enter the choice between 1-3.", 0
 
 .code
 main PROC
-
-;call displayLogo
+call displayLogo
 call showMenu
 
 cmp eax, 10
@@ -806,7 +806,7 @@ call gotoxy
 
 mov edx, OFFSET exploreTheMagic
 call writestring
-call readint
+call readchar
 
 call clrscr
 
@@ -859,7 +859,7 @@ call gotoxy
 
 mov ecx, 60
 mov ebx, 70
-L3:
+loadingBarrr:
     mov edx, OFFSET loadingBar
     call writestring
 
@@ -868,7 +868,7 @@ L3:
 
     dec ebx
 
-Loop L3
+Loop loadingBarrr
 
 call clrscr
 
@@ -1013,6 +1013,8 @@ cdq
 div ebx
 
 mov eax, edx
+mov esi , eax
+mov eax, random_arr[esi * type random_arr]
 
 
 COMMENT !
@@ -1117,8 +1119,6 @@ showTeam PROC
 mov edx, OFFSET team
 call writestring
 
-call CRLF
-call CRLF
 
 ret
 showTeam ENDP

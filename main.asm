@@ -135,7 +135,8 @@ KeyForPlayer_2 BYTE ", Your in-game Key is: R", 0
 printTurn BYTE ", it's your turn.", 0                                                                                                  
 cong BYTE "Congratulations ", 0                                                                                                        
 wonTheMatch BYTE "! You won the Match.", 0                                                                                              
-forLost BYTE ", better Luck Next Time", 0                                                                                              
+forLost BYTE ", better Luck Next Time", 0  
+exitingTheProgram BYTE "Exiting the Program.....", 0
                                                                                                                                        
                                                                                                                                        
 ; =================== Instructions ====================                                                                                
@@ -159,19 +160,31 @@ WrongMenuInput BYTE "Please Enter the choice between 1-3.", 0
 
 .code
 main PROC
-;call displayIntro
+call displayIntro
 call showMenu
 
 cmp eax, 10
 je exitt
 
-call getUserData
+call getPlayerData
 call showInstructions
 call printGetSetGo
 call startGame
-call showTeam
 
 exitt:
+call CRLF
+mov ecx, 24
+mov esi, 0
+P1:
+    mov eax, 0
+    mov al, exitingTheProgram[esi]
+    call writechar
+
+    inc esi
+    mov eax, 120
+    call delay
+Loop P1
+
 exit
 main ENDP
 
@@ -710,9 +723,9 @@ ComputeMatrix ENDP
 ;====================================================================
 
 
-;========================= Get User Data =============================
+;========================= Get Player Data =============================
 
-getUserData PROC
+getPlayerData PROC
 
 call CRLF
 cmp Bot_selected, 1
@@ -845,7 +858,7 @@ call CRLF
 endd:
 
 ret
-getUserData ENDP
+getPlayerData ENDP
 ;=======================================================================
 
 ;====================== Display Intro ==================================
@@ -859,8 +872,19 @@ mov dh, 7
 mov dl, 45
 call gotoxy
 
-mov edx, OFFSET exploreTheMagic
-call writestring
+mov ecx, 39
+mov esi, 0
+P1:
+    mov eax, 0
+    mov al, exploreTheMagic[esi]
+    call writechar
+
+    inc esi
+    mov eax, 75
+    call delay
+Loop P1
+;mov edx, OFFSET exploreTheMagic
+;call writestring
 call readchar
 
 call clrscr

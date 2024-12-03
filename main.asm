@@ -100,7 +100,7 @@ team BYTE " ", 0ah, 0ah
      BYTE "Abubakar Ahmed (23K-0801)", 0ah
      BYTE "Kirish Kumar (23K-0641)", 0ah
      BYTE "Sameed Jamal Khan (23K-0812)", 0ah
-     BYTE "-----------------------------------", 0
+     BYTE "------------------------------", 0
 
 loading BYTE "Loading", 0
 loadingBar BYTE "=", 0
@@ -159,7 +159,7 @@ WrongMenuInput BYTE "Please Enter the choice between 1-3.", 0
 
 .code
 main PROC
-call displayLogo
+;call displayIntro
 call showMenu
 
 cmp eax, 10
@@ -169,6 +169,7 @@ call getUserData
 call showInstructions
 call printGetSetGo
 call startGame
+call showTeam
 
 exitt:
 exit
@@ -240,7 +241,6 @@ GameLoop:
 
     call generateRandomNumber
     call writeint
-    call CRLF
     jmp Bot_turn
     
     
@@ -452,7 +452,8 @@ InsertInMatrix ENDP
                                                                                                                                          
 ;===============================================  Display Matrix  ====================================================================================     
                                                                                                                                          
-DisplayMatrix PROC                                                                                                                       
+DisplayMatrix PROC    
+    call CRLF
     mov ecx, 6                                                                                                                           
     mov esi, 0                                                                                                                           
     l1:                                                                                                                                  
@@ -717,13 +718,39 @@ call CRLF
 cmp Bot_selected, 1
 je skipDefaultPrompt
 
-mov edx, OFFSET askForUsername_1
-call writestring
+mov ecx, 28
+mov esi, 0
+L1:
+    mov eax, 0
+    mov al, askForUsername_1[esi]
+    call writechar
+
+    inc esi
+    mov eax, 50
+    call delay
+
+    Loop L1
+
+;mov edx, OFFSET askForUsername_1
+;call writestring
 jmp getName
 
 skipDefaultPrompt:
-mov edx, OFFSET askForName
-call writestring
+
+mov ecx, 20
+mov esi, 0
+P1: 
+    mov eax, 0
+    mov al, askForName[esi]
+    call writechar
+
+    inc esi
+    mov eax, 50
+    call delay
+Loop P1
+
+;mov edx, OFFSET askForName
+;call writestring
 
 getName:
 mov ecx, 20
@@ -733,9 +760,22 @@ call readstring
 cmp Bot_selected, 1
 je skipPlayer2
 
-mov edx, OFFSET askForUsername_2
-call writestring
-;mov ecx, 20
+mov ecx, 28
+mov esi, 0
+P2:
+    mov eax, 0
+    mov al, askForUsername_2[esi]
+    call writechar
+
+    inc esi
+    mov eax, 50
+    call delay
+Loop P2
+
+;mov edx, OFFSET askForUsername_2
+;call writestring
+
+mov ecx, 20
 mov edx, OFFSET player_2
 call readstring
 
@@ -757,12 +797,26 @@ call CRLF
 L2:
 
 call CRLF
-mov edx, OFFSET rememberYourKey
-call writestring
+mov ecx, 27
+mov esi, 0
+P3:
+    mov eax, 0
+    mov al, rememberYourKey[esi]
+    call writechar
+
+    inc esi
+    mov eax, 50
+    call delay
+Loop P3
+
+;mov edx, OFFSET rememberYourKey
+;call writestring
+
 call CRLF
 
 mov edx, OFFSET player_1
 call writestring
+
 mov edx, OFFSET KeyForPlayer_1
 call writestring
 
@@ -774,6 +828,7 @@ mov edx, OFFSET player_2
 call writestring
 mov edx, OFFSET KeyForPlayer_2
 call writestring
+
 call CRLF
 call CRLF
 
@@ -794,7 +849,7 @@ getUserData ENDP
 ;=======================================================================
 
 ;====================== Display Intro ==================================
-displayLogo PROC
+displayIntro PROC
 
 
 mov eax, lightgreen
@@ -857,7 +912,7 @@ mov dh, 8
 mov dl, 45
 call gotoxy
 
-mov ecx, 60
+mov ecx, 70
 mov ebx, 70
 loadingBarrr:
     mov edx, OFFSET loadingBar
@@ -934,7 +989,7 @@ call CRLF
 !
 
 ret
-displayLogo ENDP
+displayIntro ENDP
 ;===================================================================
 
 ;===================== Print GameOver ==============================
@@ -965,7 +1020,6 @@ call CRLF
 mov edx, OFFSET startTheMatch
 call writestring
 
-call CRLF
 call CRLF
 
 ret
@@ -1044,8 +1098,20 @@ generateRandomNumber ENDP
 showMenu PROC
 
 Menu_Loop:
-    mov edx, offset menu
-    call writestring
+    mov ecx, 61
+    mov esi, 0
+    L1:
+        mov eax, 0
+        mov al, menu[esi]
+        call writechar
+        
+        inc esi
+        mov eax, 20
+        call delay
+
+    Loop L1
+    ;mov edx, offset menu
+    ;call writestring
 
     call readint
     cmp eax, 1
@@ -1083,9 +1149,21 @@ playMatch:
 
     call CRLF
     call CRLF
+    
+    mov ecx, 103
+    mov esi, 0
+    L2:
+        mov eax, 0
+        mov al, menuItems[esi]
+        call writechar
+        
+        inc esi
+        mov eax, 20
+        call delay
 
-    mov edx, offset menuItems
-	call writestring
+    Loop L2
+    ;mov edx, offset menuItems
+	;call writestring
 
 	call readint
 	cmp eax, 1
@@ -1116,8 +1194,22 @@ showMenu ENDP
 
 showTeam PROC
 
-mov edx, OFFSET team
-call writestring
+mov ecx, 124
+call CRLF
+mov esi, 0
+L1:
+    mov eax, 0
+    mov al, team[esi]
+    call writechar
+    
+    inc esi
+	mov eax, 25
+    call delay
+    
+Loop L1
+
+;mov edx, OFFSET team
+;call writestring
 
 
 ret

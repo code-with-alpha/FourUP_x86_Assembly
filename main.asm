@@ -70,7 +70,6 @@ gameOver BYTE "          ________   ________   _____ ______    _______          
          BYTE "            \ \_______\\ \__\ \__\\ \__\    \ \__\\ \_______\       \ \_______\\ \__/ /      \ \_______\\ \__\\ _\ ", 0ah     
          BYTE "             \|_______| \|__|\|__| \|__|     \|__| \|_______|        \|_______| \|__|/        \|_______| \|__|\|__|", 0       
 
-exploreTheMagic BYTE "Press ENTER key to explore the magic...", 0
 ;============================================================== ASCII Arts ENDP ===================================================================
 
 ;======================= Basic Requirements ========================
@@ -84,6 +83,8 @@ matrixFull dword 0
 Bot_selected dword 0                                                                                                                 
 random_arr dword 3,1,6,2,5,0,4                                                                                                                                         
 totall dword 1
+promptForEnteringColumnNo byte "Enter the column Number : ", 0
+
 
 menu BYTE "1. Play a Match.", 0ah
      BYTE "2. Developers.", 0ah
@@ -94,7 +95,14 @@ menuItems BYTE "1. Single Player (Player vs Computer).", 0ah
           BYTE "2. Multi-Player (Player vs Player)", 0ah
           BYTE "3. Back", 0ah
           BYTE "Enter your choice : ", 0
+;=======================================================================
 
+;=============================== INTRO =================================
+exploreTheMagic BYTE "Press ENTER key to explore the magic...", 0
+loading BYTE "Loading", 0
+loadingBar BYTE "=", 0
+
+;================================ TEAM ==================================
 team BYTE " ", 0ah, 0ah
      BYTE "----------", 0ah
      BYTE "Abubakar Ahmed (23K-0801)", 0ah
@@ -102,23 +110,19 @@ team BYTE " ", 0ah, 0ah
      BYTE "Sameed Jamal Khan (23K-0812)", 0ah
      BYTE "------------------------------", 0
 
-loading BYTE "Loading", 0
-loadingBar BYTE "=", 0
-
+;============================== BOT =====================================
 botIsThinking BYTE "genZ is thinking", 0
-botKeyPlaced BYTE "genZ placed his key at column: ", 0
-     
+botKeyPlaced BYTE "genZ placed his key at column: ", 0   
 count DWORD 0
 
-promptForEnteringColumnNo byte "Enter the column Number : ", 0
 
-; =============== prompts for getting the user data ===============
+; =============== prompts for getting the player data =============
 
 ; ----------- playing against Bot -------------
 askForName BYTE "Enter Player Name: ", 0
 promptt BYTE ", You are playing against genZ..!", 0
 rememberYourKey BYTE "Must remember your key...!", 0
-
+;-----------------------------------------------
 
 askForUsername_1 BYTE "Enter Name for Player - 01: ", 0                                                                                
 askForUsername_2 BYTE "Enter Name for Player - 02: ", 0                                                                                
@@ -126,6 +130,7 @@ player_1 BYTE 20 DUP(0)
 player_2 BYTE 20 DUP(0)
 Bot_player BYTE "genZ", 0                                                                                                                  
 botTurn BYTE "Bot's Turn", 0 
+;===================================================================
                                                                                                                                        
 ; =============== assign Keys ===============                                                                                          
 KeyForPlayer_1 BYTE ", Your in-game Key is: B", 0                                                                                      
@@ -141,8 +146,8 @@ exitingTheProgram BYTE "Exiting the Program.....", 0
                                                                                                                                        
 ; =================== Instructions ====================                                                                                
 promptForInstructions BYTE "Before moving ahead, just take a look at the instructions set.", 0                                         
-instructions BYTE "Following are the set of instructions.", 0ah                                                                        
-             BYTE "- To play, enter the column number (0-6) where you want to place your key.", 0ah                                    
+instruct BYTE "Following are the set of instructions...", 0                                                      
+instructions BYTE "- To play, enter the column number (0-6) where you want to place your key.", 0ah                                    
              BYTE "- The first player to connect four keys in a row, column, or the diagonal wins!", 0ah                               
              BYTE "- If you'll not Enter any key, the game will place your key in 0th column if there is any space in that column", 0ah
              BYTE "- The game ends in a tie if the board is full and none of the player has connect their four keys.", 0ah, 0ah, 0                                                                               
@@ -184,6 +189,9 @@ P1:
     mov eax, 120
     call delay
 Loop P1
+
+call CRLF
+call CRLF
 
 exit
 main ENDP
@@ -246,11 +254,30 @@ GameLoop:
 
     Loop printDots
     call CRLF
-
+    
     skipThinking:
 
+    cmp count, 3
+    jl printString
+
+    mov ecx, LENGTHOF botKeyPlaced
+    mov esi, 0
+    P1:
+        mov eax, 0
+        mov al, botKeyPlaced[esi]
+        call writechar
+
+        inc esi
+        mov eax, 65
+        call delay
+    Loop P1
+    jmp skipp
+
+    printString:
     mov edx, OFFSET botKeyPlaced
     call writestring
+
+    skipp:
 
     call generateRandomNumber
     call writeint
@@ -1041,8 +1068,20 @@ call writestring
 call CRLF
 call CRLF
 
-mov edx, OFFSET startTheMatch
-call writestring
+mov ecx, 93
+mov esi, 0
+P1:
+    mov eax, 0
+    mov al, startTheMatch[esi]
+    call writechar
+
+    inc esi
+    mov eax, 50
+    call delay
+Loop P1
+
+;mov edx, OFFSET startTheMatch
+;call writestring
 
 call CRLF
 
@@ -1054,8 +1093,20 @@ printGetSetGo ENDP
 
 showInstructions PROC
 
-mov edx, offset promptForInstructions
-call writestring
+mov ecx, 63 ; length of the string
+mov esi, 0
+P1:
+    mov eax, 0
+    mov al, promptForInstructions[esi]
+    call writechar
+
+    inc esi
+    mov eax, 45
+    call delay
+Loop P1
+
+;mov edx, offset promptForInstructions
+;call writestring
 
 call CRLF
 
@@ -1069,8 +1120,27 @@ call writestring
 
 call CRLF
 
+mov ecx, 40
+mov esi, 0
+P2:
+    mov eax, 0
+    mov al, instruct[esi]
+    call writechar
+
+    inc esi
+    mov eax, 45
+    call delay
+Loop P2
+
+mov eax, 500
+call delay
+
+call CRLF
 mov edx, OFFSET instructions
 call writestring
+
+mov eax, 3000
+call delay
 
 call waitmsg
 call CRLF
@@ -1130,7 +1200,7 @@ Menu_Loop:
         call writechar
         
         inc esi
-        mov eax, 20
+        mov eax, 65
         call delay
 
     Loop L1
@@ -1182,7 +1252,7 @@ playMatch:
         call writechar
         
         inc esi
-        mov eax, 20
+        mov eax, 35
         call delay
 
     Loop L2
@@ -1219,7 +1289,6 @@ showMenu ENDP
 showTeam PROC
 
 mov ecx, 124
-call CRLF
 mov esi, 0
 L1:
     mov eax, 0
@@ -1227,7 +1296,7 @@ L1:
     call writechar
     
     inc esi
-	mov eax, 25
+	mov eax, 45
     call delay
     
 Loop L1
